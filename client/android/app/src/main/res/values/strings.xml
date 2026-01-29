@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TaskPlanner</string>
+    <string name="title_activity_main">TaskPlanner</string>
+    <string name="package_name">com.planner.planner</string>
+    <string name="custom_url_scheme">com.planner.planner</string>
+</resources>
