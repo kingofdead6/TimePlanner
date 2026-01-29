@@ -1,1 +1,1 @@
-export const NODE_API = 'http://localhost:5000/api';
+export const NODE_API = 'https://timeplanner-kfwh.onrender.com/api';

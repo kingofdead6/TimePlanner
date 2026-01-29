@@ -5,6 +5,11 @@
   scrollbar-color: #2563eb #030712; /* thumb | track */
 }
 
+body, #root {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Chrome, Edge, Safari */
 *::-webkit-scrollbar {
   width: 10px;

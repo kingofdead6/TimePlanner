@@ -9,33 +9,7 @@ import TaskPlanner from "./components/tasks/TaskPlanner";
 import ActiveTasks from "./components/tasks/ActiveTasks";
 import CompletedTasks from "./components/tasks/CompletedTasks";
 import SubtaskPage from "./components/tasks/SubTaskPage";
-
-
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    // Check if user is already logged in (on app start / refresh)
-    const storedEmail = sessionStorage.getItem('email') || localStorage.getItem('email');
-    
-    if (storedEmail) {
-      setIsAuthenticated(true);
-    }
-    
-    setCheckingAuth(false);
-  }, []);
-
-
-
-  // Show loading spinner while checking auth (prevents flash)
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="text-blue-400 text-xl animate-pulse">Loading...</div>
-      </div>
-    );
-  }
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 function BackButtonHandler() {
   const navigate = useNavigate();
@@ -76,6 +50,54 @@ function BackButtonHandler() {
 
   return null;
 }
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already logged in (on app start / refresh)
+    const storedEmail = sessionStorage.getItem('email') || localStorage.getItem('email');
+    
+    if (storedEmail) {
+      setIsAuthenticated(true);
+    }
+    
+    setCheckingAuth(false);
+  }, []);
+  
+  useEffect(() => {
+  const configureStatusBar = async () => {
+    try {
+      // Make status bar visible
+      await StatusBar.show();
+
+      // Set text color to light or dark depending on your theme
+      await StatusBar.setStyle({ style: Style.Light }); // options: Light, Dark
+
+      // Optional: make it not overlay your webview content
+      await StatusBar.setOverlaysWebView({ overlay: false });
+    } catch (err) {
+      console.log('StatusBar error:', err);
+    }
+  };
+
+  configureStatusBar();
+}, []);
+
+
+  // Show loading spinner while checking auth (prevents flash)
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+        <div className="text-blue-400 text-xl animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+
+
+
 
   return (
     <Router>
