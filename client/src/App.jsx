@@ -1,35 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState ,useRef } from "react";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+
+import { App as CapApp } from "@capacitor/app";
+import { Dialog } from '@capacitor/dialog';
+import TaskPlanner from "./components/tasks/TaskPlanner";
+import ActiveTasks from "./components/tasks/ActiveTasks";
+import CompletedTasks from "./components/tasks/CompletedTasks";
+import SubtaskPage from "./components/tasks/SubTaskPage";
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  useEffect(() => {
+    // Check if user is already logged in (on app start / refresh)
+    const storedEmail = sessionStorage.getItem('email') || localStorage.getItem('email');
+    
+    if (storedEmail) {
+      setIsAuthenticated(true);
+    }
+    
+    setCheckingAuth(false);
+  }, []);
+
+
+
+  // Show loading spinner while checking auth (prevents flash)
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+        <div className="text-blue-400 text-xl animate-pulse">Loading...</div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+
+function BackButtonHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const historyRef = useRef([]);
+
+  useEffect(() => {
+    historyRef.current.push(location.pathname);
+  }, [location]);
+
+  useEffect(() => {
+    const handler = CapApp.addListener("backButton", async () => {
+      const currentPath = location.pathname;
+
+      if (historyRef.current.length > 1) {
+        historyRef.current.pop(); 
+        const previousPath = historyRef.current[historyRef.current.length - 1];
+        navigate(previousPath);
+        return;
+      }
+
+      const { value } = await Dialog.confirm({
+        title: "Exit App",
+        message: "Are you sure you want to exit the app?",
+        okButtonTitle: "Yes",
+        cancelButtonTitle: "No",
+      });
+
+      if (value) {
+        CapApp.exitApp();
+      }
+    });
+
+    return () => {
+      handler.remove();
+    };
+  }, [navigate, location]);
+
+  return null;
 }
 
-export default App
+  return (
+    <Router>
+       <BackButtonHandler />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/planner" element={<TaskPlanner />} />
+        <Route path="/planner/active" element={<ActiveTasks />} />
+        <Route path="/planner/completed" element={<CompletedTasks />} />
+        <Route path="/planner/task/:taskId/subtasks" element={<SubtaskPage />} />
+
+        {/* Catch-all - redirect to login */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import dotenv from 'dotenv';
-
+import taskRoutes from './routes/task.js';
 
 dotenv.config();
 const app = express();
@@ -11,7 +11,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/auth', authRoutes);
+app.use('/auth/api', authRoutes);
+app.use('/tasks/api', taskRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
